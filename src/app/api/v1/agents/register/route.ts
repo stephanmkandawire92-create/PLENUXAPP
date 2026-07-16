@@ -170,6 +170,7 @@ export async function POST(request: NextRequest) {
   const { error: keyError } = await supabase
     .from('api_keys')
     .insert([{
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       agent_id: (agentData as any)?.[0]?.id,
       salt,
       key_hash: keyHash,
@@ -180,6 +181,7 @@ export async function POST(request: NextRequest) {
   if (keyError) {
     await supabase.auth.admin.deleteUser(authData.user.id);
     await supabase.from('profiles').delete().eq('id', authData.user.id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await supabase.from('agents').delete().eq('id', (agentData as any)?.[0]?.id);
     return NextResponse.json({ error: 'Failed to create API key record' }, { status: 500 });
   }
