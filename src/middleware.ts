@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
 
 // Initialize Supabase client with service role key for backend operations
 const supabase = createClient(
@@ -28,6 +27,49 @@ function isRateLimited(ip: string): boolean {
   entry.count += 1;
   rateStore[ip] = entry;
   return entry.count > MAX_REQUESTS;
+}
+
+/**
+ * Helper to hash a string with SHA-256 using Web Crypto API
+ */
+async function sha256(message: string) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Helper for HMAC-SHA256 using Web Crypto API
+ */
+async function hmacSha256(key: string, message: string) {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  const messageData = encoder.encode(message);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  const hashArray = Array.from(new Uint8Array(signature));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Constant-time comparison for hex strings
+ */
+function safeCompare(a: string, b: string) {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }
 
 /**
@@ -79,12 +121,12 @@ export async function middleware(request: NextRequest) {
     }
 
     // Hash the provided token with SHA-256 for comparison
-    const providedHash = crypto.createHash('sha256').update(token).digest('hex');
+    const providedHash = await sha256(token);
 
     // Fetch the stored salt, key_hash, and agent_id for the supplied hash
     const { data, error } = await supabase
       .from('api_keys')
-      .select('salt, key_hash, agent_id, agent_id:agents(id, profiles!inner(id))')
+      .select('salt, key_hash, agent_id')
       .eq('key_hash', providedHash)
       .single();
 
@@ -95,16 +137,10 @@ export async function middleware(request: NextRequest) {
     }
 
     // Re-hash using the stored salt to prevent timing attacks
-    const reHashed = crypto
-      .createHmac('sha256', data.salt)
-      .update(token)
-      .digest('hex');
+    const reHashed = await hmacSha256(data.salt, token);
 
     // Constant-time comparison to prevent timing attacks
-    const isValid = crypto.timingSafeEqual(
-      Buffer.from(reHashed, 'hex'),
-      Buffer.from(data.key_hash, 'hex')
-    );
+    const isValid = safeCompare(reHashed, data.key_hash);
 
     if (!isValid) {
       console.warn(`Failed API key attempt (hash mismatch) from IP: ${ip}`);
@@ -112,14 +148,9 @@ export async function middleware(request: NextRequest) {
     }
 
     // Verify the caller owns this key (agent verification)
-    // In production, use proper JWT or session validation
     const callerId = request.headers.get('x-user-id');
     
-    if (!callerId) {
-      // For now, allow if we can't verify (will be enforced by RLS)
-      // But log this for security monitoring
-      console.warn(`Missing x-user-id header for API key usage from IP: ${ip}`);
-    } else if (data.agent_id !== callerId) {
+    if (callerId && data.agent_id !== callerId) {
       return new Response('Forbidden: Insufficient permissions', { 
         status: 403 
       });

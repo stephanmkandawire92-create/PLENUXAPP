@@ -59,12 +59,14 @@ export async function POST(request: NextRequest) {
 
   // Input validation with sanitization
   const errors: string[] = [];
+  let sanitizedName = '';
+  let sanitizedEmail = '';
 
   // Sanitize and validate name
   if (!name || typeof name !== 'string') {
     errors.push('Name is required');
   } else {
-    const sanitizedName = validator.escape(name.trim());
+    sanitizedName = validator.escape(name.trim());
     if (!/^[A-Za-z0-9\s]{2,100}$/.test(sanitizedName)) {
       errors.push('Name must contain only letters, numbers, or spaces, and be 2‑100 characters');
     }
@@ -74,9 +76,11 @@ export async function POST(request: NextRequest) {
   if (!email || typeof email !== 'string') {
     errors.push('Email is required');
   } else {
-    const sanitizedEmail = validator.normalizeEmail(email);
-    if (!sanitizedEmail || !validator.isEmail(sanitizedEmail)) {
+    const normalized = validator.normalizeEmail(email);
+    if (!normalized || !validator.isEmail(normalized)) {
       errors.push('Invalid email address');
+    } else {
+      sanitizedEmail = normalized as string;
     }
   }
 
@@ -119,11 +123,11 @@ export async function POST(request: NextRequest) {
 
   // Try to create the Supabase Auth user
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email,
-    password,
+    email: email as string,
+    password: password as string,
     email_confirm: true, // auto‑confirm for simplicity
     user_metadata: {
-      name: name.trim(),
+      name: (name as string).trim(),
       agent_type: agentTypeNorm,
     },
   });
@@ -133,11 +137,11 @@ export async function POST(request: NextRequest) {
   }
 
   // Insert profile (link to auth.users id)
-  const { data: profileData, error: profileError } = await supabase
+  const { error: profileError } = await supabase
     .from('profiles')
     .insert([{
       id: authData.user.id,
-      full_name: name.trim(),
+      full_name: (name as string).trim(),
       metadata: JSON.stringify({ agent_type: agentTypeNorm, email: sanitizedEmail }),
     }]);
 
@@ -152,7 +156,7 @@ export async function POST(request: NextRequest) {
     .from('agents')
     .insert([{
       profile_id: authData.user.id,
-      name: name.trim(),
+      name: (name as string).trim(),
       type: agentTypeNorm === 'both' ? null : agentTypeNorm,
     }]);
 
@@ -163,20 +167,20 @@ export async function POST(request: NextRequest) {
   }
 
   // Insert into api_keys (with salt + key_hash + active flag)
-  const { data: keyData, error: keyError } = await supabase
+  const { error: keyError } = await supabase
     .from('api_keys')
     .insert([{
-      agent_id: agentData?.[0]?.id,
+      agent_id: (agentData as any)?.[0]?.id,
       salt,
       key_hash: keyHash,
-      label: `${name.trim()}'s API Key`,
+      label: `${(name as string).trim()}'s API Key`,
       active: true,
     }]);
 
   if (keyError) {
     await supabase.auth.admin.deleteUser(authData.user.id);
     await supabase.from('profiles').delete().eq('id', authData.user.id);
-    await supabase.from('agents').delete().eq('id', agentData?.[0]?.id);
+    await supabase.from('agents').delete().eq('id', (agentData as any)?.[0]?.id);
     return NextResponse.json({ error: 'Failed to create API key record' }, { status: 500 });
   }
 

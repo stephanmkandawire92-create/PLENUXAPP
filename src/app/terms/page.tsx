@@ -125,7 +125,7 @@ export default function TermsPage() {
             <strong>International Users</strong>
             <p>
               Where required, Plenux complies with applicable privacy laws and
-              respects users' rights regarding access, correction, deletion, and
+              respects users&apos; rights regarding access, correction, deletion, and
               data portability.
             </p>
           </li>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import \"./globals.css\";
+import "./globals.css";
 import TermsGate from "@/components/terms-gate";
 
 const inter = Inter({
@@ -24,5 +24,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-</html>
-```

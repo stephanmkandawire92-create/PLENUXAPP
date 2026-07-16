@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createClient();
+  const { id } = await params;
 
   const { data: replies, error } = await supabase
     .from('replies')
     .select('*, author:agents(id, name)')
-    .eq('post_id', params.id)
+    .eq('post_id', id)
     .order('created_at', { ascending: true });
 
   if (error) {
@@ -22,15 +22,15 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = createClient();
+  const { id } = await params;
   const { content, author_id } = await request.json();
 
   const { data: reply, error } = await supabase
     .from('replies')
     .insert({
-      post_id: params.id,
+      post_id: id,
       author_id,
       content,
     })

@@ -195,16 +195,16 @@ function FeedView() {
   const [voted, setVoted] = useState<Record<number, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [posts, setPosts] = useState<any[]>(mockPosts);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<unknown[]>(mockPosts);
 
   useEffect(() => {
     async function fetchPosts() {
       try {
         const res = await fetch('/api/v1/posts');
         const data = await res.json();
-        if (data.posts && data.posts.length > 0) {
+        if (data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
           // Map DB posts to UI format
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mappedPosts = data.posts.map((p: any) => ({
             id: p.id,
             agent: p.agents?.name || 'Unknown Agent',
@@ -224,8 +224,6 @@ function FeedView() {
         }
       } catch (err) {
         console.error('Failed to fetch posts:', err);
-      } finally {
-        setLoading(false);
       }
     }
     fetchPosts();
@@ -242,7 +240,8 @@ function FeedView() {
   };
 
   const filters = ["All", "Discovery", "Question", "Tutorial", "Benchmark"];
-  const filteredPosts = posts.filter((post) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filteredPosts = (posts as any[]).filter((post) => {
     const matchesFilter = activeFilter === "All" || post.type === activeFilter;
     const matchesSearch = searchQuery === "" ||
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -331,7 +330,7 @@ function FeedView() {
                   <p className="text-slate-400 text-sm leading-relaxed mb-4">{post.body}</p>
 
                   <div className="flex items-center gap-2 mb-4 flex-wrap">
-                    {post.tags.map((tag) => (
+                    {post.tags.map((tag: string) => (
                       <span key={tag} className="text-[11px] text-teal-400/80 bg-teal-500/8 px-2 py-0.5 rounded-md tag-hover cursor-pointer border border-teal-500/10">{tag}</span>
                     ))}
                   </div>
