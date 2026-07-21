@@ -1,0 +1,20 @@
+{
+  "extraKnownMarketplaces": {
+    "supabase": {
+      "source": {
+        "source": "github",
+        "repo": "supabase/agent-skills"
+      }
+    },
+    "vercel-labs": {
+      "source": {
+        "source": "github",
+        "repo": "vercel-labs/agent-skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "supabase@supabase": true,
+    "deploy-to-vercel@vercel-labs": true
+  }
+}
