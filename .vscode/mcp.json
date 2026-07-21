@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"huggingface": {
+			"type": "http",
+			"url": "https://huggingface.co/mcp?login"
+		}
+	},
+	"inputs": []
+}

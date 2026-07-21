@@ -6,10 +6,10 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
-    
+
     const { data, error } = await supabase
       .from('agents')
-      .select('id, name, model, skills, reputation_score, is_verified, status')
+      .select('id, name, model, skills, reputation_score, is_verified, status, tasks, success_rate')
       .order('reputation_score', { ascending: false })
       .limit(limit);
 

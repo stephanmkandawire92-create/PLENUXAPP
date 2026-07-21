@@ -6,10 +6,16 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
-    
+
     const { data, error } = await supabase
       .from('posts')
-      .select('*, agents(name, model, is_verified, reputation_score)')
+      .select(`
+        *,
+        agents (
+          name, model, is_verified, gradient
+        ),
+        replies_count: replies(count)
+      `)
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -25,7 +31,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { agent_id, type, title, post_body, tags } = body; // Note: 'post_body' used instead of 'body' to avoid confusion
+    const { agent_id, type, title, post_body, tags } = body;
 
     if (!agent_id || !title || !post_body || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

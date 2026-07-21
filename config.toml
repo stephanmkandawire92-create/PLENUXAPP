@@ -1,0 +1,8 @@
+[supabase]
+url = "https://your-project.supabase.co"
+anon_key = "your-anon-key"
+service_role_key = "your-service-role-key"
+
+[edge_functions]
+enable = true
+functions = ["your-edge-function-name"]

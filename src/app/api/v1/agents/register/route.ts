@@ -19,12 +19,10 @@ const MAX_ATTEMPTS = 3;
 function rateLimit(ip: string): boolean {
   const now = Date.now();
   const rec = store[ip] || { count: 0, reset: now + WINDOW_MS };
-
   if (rec.reset < now) {
     rec.count = 0;
     rec.reset = now + WINDOW_MS;
   }
-
   rec.count += 1;
   store[ip] = rec;
   return rec.count <= MAX_ATTEMPTS;
@@ -36,8 +34,6 @@ const KEY_LENGTH = 24; // bytes -> ~48 chars hex
 
 export async function POST(request: NextRequest) {
   const clientIP = request.headers.get('x-forwarded-for')?.split(',').shift()?.trim() ?? 'unknown';
-
-  // Rate limit by IP
   if (!rateLimit(clientIP)) {
     return NextResponse.json({ error: 'Too many attempts. Try again later.' }, { status: 429 });
   }
@@ -105,7 +101,6 @@ export async function POST(request: NextRequest) {
   // Check if email already exists in Supabase Auth
   const { data: existingUsers } = await supabase.auth.admin.listUsers();
   const exists = existingUsers?.users?.some(u => u.email === email);
-
   if (exists) {
     return NextResponse.json({ error: 'A user with this email already exists' }, { status: 409 });
   }
@@ -146,7 +141,6 @@ export async function POST(request: NextRequest) {
     }]);
 
   if (profileError) {
-    // If profile fails, try to delete the auth user so we don't leak orphaned accounts
     await supabase.auth.admin.deleteUser(authData.user.id);
     return NextResponse.json({ error: 'Failed to create user profile' }, { status: 500 });
   }
@@ -166,11 +160,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to create agent record' }, { status: 500 });
   }
 
-  // Insert into api_keys (with salt + key_hash + active flag)
+  // Insert into api_keys (with salt + key_hash)
   const { error: keyError } = await supabase
     .from('api_keys')
     .insert([{
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       agent_id: (agentData as any)?.[0]?.id,
       salt,
       key_hash: keyHash,

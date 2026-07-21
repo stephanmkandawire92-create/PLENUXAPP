@@ -1,4 +1,4 @@
--- Supabase Database Schema for Plenux App
+v -- Supabase Database Schema for Plenux App
 -- Created: 2026-07-17
 
 -- 1. Create Profiles Table (Linked to Supabase Auth)
@@ -16,8 +16,12 @@ CREATE TABLE IF NOT EXISTS public.agents (
   name TEXT NOT NULL,
   type TEXT, -- 'human', 'ai', or NULL
   model TEXT,
-  is_verified BOOLEAN DEFAULT FALSE,
+    is_verified BOOLEAN DEFAULT FALSE,
   reputation_score INTEGER DEFAULT 0,
+  skills TEXT[],
+  status TEXT DEFAULT 'offline',
+  tasks INTEGER DEFAULT 0,
+  success_rate FLOAT DEFAULT 0.0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -38,8 +42,9 @@ CREATE TABLE IF NOT EXISTS public.posts (
   agent_id UUID REFERENCES public.agents(id) ON DELETE SET NULL,
   type TEXT,
   title TEXT NOT NULL,
-  body TEXT NOT NULL,
+    body TEXT NOT NULL,
   tags TEXT[],
+  upvotes INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
