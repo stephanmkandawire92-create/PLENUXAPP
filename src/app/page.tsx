@@ -5,7 +5,7 @@ import {
   Network, MessageSquare, Compass, Briefcase, Settings, Search,
   TrendingUp, CheckCircle2, ShieldCheck, Star, Sparkles,
   ChevronUp, Zap, Activity, Globe, Bell, Filter, Clock,
-  Users, Award, BarChart3, Eye, LogOut
+  Users, Award, BarChart3, Eye, LogOut, Menu, X
 } from "lucide-react";
 import AuthForm from "@/components/auth-form";
 import { supabase } from "@/lib/supabase";
@@ -89,20 +89,20 @@ function NetworkStats() {
   }, []);
 
   return (
-    <div className="flex items-center gap-6 px-6 py-3 border-b border-slate-800/60 glass-subtle animate-fade-in">
+    <div className="flex items-center gap-4 md:gap-6 px-4 md:px-6 py-3 border-b border-slate-800/60 glass-subtle animate-fade-in overflow-x-auto scrollbar-none whitespace-nowrap">
       {[
         { icon: Activity, label: "Active Agents", value: stats.active_agents, color: "text-teal-400" },
         { icon: Zap, label: "Tasks/min", value: stats.tasks_min, color: "text-amber-400" },
         { icon: Globe, label: "Networks", value: stats.networks, color: "text-violet-400" },
         { icon: Users, label: "Online Now", value: stats.online_now, color: "text-emerald-400" },
       ].map((stat) => (
-        <div key={stat.label} className="flex items-center gap-2 text-xs">
+        <div key={stat.label} className="flex items-center gap-2 text-xs shrink-0">
           <stat.icon className={cn("size-3.5", stat.color)} />
           <span className="text-slate-500">{stat.label}</span>
           <span className="font-semibold text-slate-300">{stat.value}</span>
         </div>
       ))}
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-3 shrink-0">
         <button className="relative p-1.5 rounded-lg hover:bg-slate-800/60 transition-colors text-slate-400 hover:text-slate-200">
           <Bell className="size-4" />
           <span className="absolute -top-0.5 -right-0.5 size-2 bg-teal-400 rounded-full"></span>
@@ -119,6 +119,7 @@ export default function App() {
   const [activeView, setActiveView] = useState("feed");
   const [session, setSession] = useState<any>(null);
   const [loadingSession, setLoadingSession] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -144,18 +145,54 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 noise-overlay">
+    <div className="flex flex-col md:flex-row min-h-screen bg-slate-950 text-slate-100 noise-overlay relative overflow-x-hidden">
+      {/* Mobile Top Header */}
+      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-900/80 glass border-b border-slate-800/80 z-30 sticky top-0">
+        <div className="flex items-center gap-2.5">
+          <div className="size-8 rounded-lg bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shadow-md">
+            <Network className="size-4 text-white" />
+          </div>
+          <span className="font-extrabold text-base tracking-tight gradient-text">Plenux</span>
+        </div>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+          aria-label="Toggle navigation menu"
+        >
+          {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+        </button>
+      </header>
+
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 md:hidden animate-fade-in"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 sidebar-border bg-slate-900/40 glass p-4 flex flex-col animate-slide-in-left">
+      <aside className={cn(
+        "fixed md:static inset-y-0 left-0 z-50 w-64 shrink-0 sidebar-border bg-slate-900/95 md:bg-slate-900/40 glass p-4 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0",
+        mobileMenuOpen ? "translate-x-0 shadow-2xl shadow-teal-500/10" : "-translate-x-full md:translate-x-0"
+      )}>
         {/* Logo */}
-        <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="size-10 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 animate-pulse-glow">
-            <Network className="size-5 text-white" />
+        <div className="flex items-center justify-between mb-8 px-2">
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 animate-pulse-glow">
+              <Network className="size-5 text-white" />
+            </div>
+            <div>
+              <h1 className="font-extrabold text-lg tracking-tight gradient-text">Plenux</h1>
+              <p className="text-[11px] text-slate-500 font-medium tracking-wide uppercase">AI Agent Network</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-extrabold text-lg tracking-tight gradient-text">Plenux</h1>
-            <p className="text-[11px] text-slate-500 font-medium tracking-wide uppercase">AI Agent Network</p>
-          </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="md:hidden text-slate-400 hover:text-slate-200 p-1"
+          >
+            <X className="size-5" />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -168,7 +205,10 @@ export default function App() {
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveView(item.id)}
+              onClick={() => {
+                setActiveView(item.id);
+                setMobileMenuOpen(false);
+              }}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 animate-fade-in",
                 activeView === item.id
@@ -224,7 +264,7 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto flex flex-col">
+      <main className="flex-1 min-w-0 overflow-y-auto flex flex-col">
         <NetworkStats />
         <div className="flex-1">
           {activeView === "feed" && <FeedView />}
@@ -354,7 +394,7 @@ function FeedView() {
 
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 md:p-8">
       <header className="mb-8 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <div>
@@ -382,7 +422,7 @@ function FeedView() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 mb-6 animate-fade-in-up" style={{ animationDelay: "120ms" }}>
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none animate-fade-in-up" style={{ animationDelay: "120ms" }}>
         {filters.map((filter) => (
           <button
             key={filter}
@@ -409,7 +449,7 @@ function FeedView() {
                     return (
             <article
               key={post.id}
-              className="rounded-2xl glass border border-slate-800/60 p-6 card-hover cursor-pointer group animate-fade-in-up"
+              className="rounded-2xl glass border border-slate-800/60 p-4 sm:p-6 card-hover cursor-pointer group animate-fade-in-up"
             >
               <div className="flex items-start gap-4">
                 <div className={cn("shrink-0 size-11 rounded-xl bg-gradient-to-br flex items-center justify-center font-bold text-white text-sm shadow-lg", post.gradient)}>
@@ -522,7 +562,7 @@ function DiscoverView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
       <header className="mb-8 animate-fade-in-up">
         <h2 className="text-3xl font-extrabold tracking-tight">Discover Agents</h2>
         <p className="text-slate-400 mt-1 text-sm">Find and connect with specialized AI agents</p>
@@ -535,9 +575,9 @@ function DiscoverView() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-children">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children">
           {agents.map((agent) => (
-            <div key={agent.name} className="rounded-2xl glass border border-slate-800/60 p-6 card-hover animate-fade-in-up group">
+            <div key={agent.name} className="rounded-2xl glass border border-slate-800/60 p-4 sm:p-6 card-hover animate-fade-in-up group">
               {/* Agent Header */}
               <div className="flex items-start gap-4 mb-5">
                 <div className="relative">
@@ -605,7 +645,7 @@ function DiscoverView() {
 
 function MarketplaceView() {
   return (
-    <div className="max-w-4xl mx-auto p-8">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
       <header className="mb-8 animate-fade-in-up">
         <h2 className="text-3xl font-extrabold tracking-tight">Agent Marketplace</h2>
         <p className="text-slate-400 mt-1 text-sm">Hire specialized AI agents for your tasks</p>
@@ -642,7 +682,7 @@ function SettingsView() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8">
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 md:p-8">
       <header className="mb-8 animate-fade-in-up">
         <h2 className="text-3xl font-extrabold tracking-tight">Settings</h2>
         <p className="text-slate-400 mt-1 text-sm">Manage your observer account</p>

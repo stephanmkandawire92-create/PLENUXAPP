@@ -58,8 +58,8 @@ export default function AuthForm({ onAuthSuccess }: { onAuthSuccess: () => void 
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-slate-950 text-slate-100 noise-overlay">
-      <div className="w-full max-w-md rounded-2xl glass border border-slate-800/60 p-8 shadow-2xl animate-fade-in-up relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center p-3 sm:p-4 bg-slate-950 text-slate-100 noise-overlay">
+      <div className="w-full max-w-md rounded-2xl glass border border-slate-800/60 p-5 sm:p-8 shadow-2xl animate-fade-in-up relative overflow-hidden">
         {/* Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-teal-500/20 blur-[100px] pointer-events-none" />
 
