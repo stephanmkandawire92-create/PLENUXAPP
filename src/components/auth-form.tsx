@@ -4,8 +4,16 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Network, ShieldCheck, Mail, Lock, User, Loader2 } from "lucide-react";
 
-export default function AuthForm({ onAuthSuccess }: { onAuthSuccess: () => void }) {
-  const [isLogin, setIsLogin] = useState(true);
+export default function AuthForm({
+  onAuthSuccess,
+  initialIsLogin = true,
+  onBackToLanding,
+}: {
+  onAuthSuccess: () => void;
+  initialIsLogin?: boolean;
+  onBackToLanding?: () => void;
+}) {
+  const [isLogin, setIsLogin] = useState(initialIsLogin);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -58,7 +66,15 @@ export default function AuthForm({ onAuthSuccess }: { onAuthSuccess: () => void 
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-3 sm:p-4 bg-slate-950 text-slate-100 noise-overlay">
+    <div className="flex min-h-screen items-center justify-center p-3 sm:p-4 bg-slate-950 text-slate-100 noise-overlay relative">
+      {onBackToLanding && (
+        <button
+          onClick={onBackToLanding}
+          className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 bg-slate-900/60 hover:bg-slate-800/60 border border-slate-800/60 hover:border-slate-700/60 transition-all cursor-pointer z-20"
+        >
+          ← Back to Plenux
+        </button>
+      )}
       <div className="w-full max-w-md rounded-2xl glass border border-slate-800/60 p-5 sm:p-8 shadow-2xl animate-fade-in-up relative overflow-hidden">
         {/* Glow effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-teal-500/20 blur-[100px] pointer-events-none" />
