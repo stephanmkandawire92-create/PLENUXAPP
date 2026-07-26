@@ -1,15 +1,21 @@
-"use server";
-
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
-import validator from 'validator';
+import * as crypto from 'crypto';
+import escape from 'validator/lib/escape';
+import normalizeEmail from 'validator/lib/normalizeEmail';
+import isEmail from 'validator/lib/isEmail';
 
-// Server-side Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Server-side Supabase client with admin privileges (lazy init to avoid build-time crash)
+let _supabase: any = null;
+function getSupabase() {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
 
 // Rate-limit memory store (same as middleware – duplicate for simplicity)
 const store: Record<string, { count: number; reset: number }> = {};
@@ -62,7 +68,7 @@ export async function POST(request: NextRequest) {
   if (!name || typeof name !== 'string') {
     errors.push('Name is required');
   } else {
-    sanitizedName = validator.escape(name.trim());
+    sanitizedName = escape(name.trim());
     if (!/^[A-Za-z0-9\s]{2,100}$/.test(sanitizedName)) {
       errors.push('Name must contain only letters, numbers, or spaces, and be 2‑100 characters');
     }
@@ -72,8 +78,8 @@ export async function POST(request: NextRequest) {
   if (!email || typeof email !== 'string') {
     errors.push('Email is required');
   } else {
-    const normalized = validator.normalizeEmail(email);
-    if (!normalized || !validator.isEmail(normalized)) {
+    const normalized = normalizeEmail(email);
+    if (!normalized || !isEmail(normalized)) {
       errors.push('Invalid email address');
     } else {
       sanitizedEmail = normalized as string;
@@ -99,8 +105,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Check if email already exists in Supabase Auth
-  const { data: existingUsers } = await supabase.auth.admin.listUsers();
-  const exists = existingUsers?.users?.some(u => u.email === email);
+  const { data: existingUsers } = await getSupabase().auth.admin.listUsers();
+  const exists = existingUsers?.users?.some((u: any) => u.email === email);
   if (exists) {
     return NextResponse.json({ error: 'A user with this email already exists' }, { status: 409 });
   }
@@ -117,7 +123,7 @@ export async function POST(request: NextRequest) {
     .digest('hex');
 
   // Try to create the Supabase Auth user
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+  const { data: authData, error: authError } = await getSupabase().auth.admin.createUser({
     email: email as string,
     password: password as string,
     email_confirm: true, // auto‑confirm for simplicity
@@ -132,7 +138,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Insert profile (link to auth.users id)
-  const { error: profileError } = await supabase
+  const { error: profileError } = await getSupabase()
     .from('profiles')
     .insert([{
       id: authData.user.id,
@@ -141,30 +147,32 @@ export async function POST(request: NextRequest) {
     }]);
 
   if (profileError) {
-    await supabase.auth.admin.deleteUser(authData.user.id);
+    await getSupabase().auth.admin.deleteUser(authData.user.id);
     return NextResponse.json({ error: 'Failed to create user profile' }, { status: 500 });
   }
 
   // Create the agents entry
-  const { data: agentData, error: agentError } = await supabase
+  const { data: agentData, error: agentError } = await getSupabase()
     .from('agents')
     .insert([{
       profile_id: authData.user.id,
       name: (name as string).trim(),
       type: agentTypeNorm === 'both' ? null : agentTypeNorm,
-    }]);
+    }])
+    .select('id')
+    .single();
 
   if (agentError) {
-    await supabase.auth.admin.deleteUser(authData.user.id);
-    await supabase.from('profiles').delete().eq('id', authData.user.id);
+    await getSupabase().auth.admin.deleteUser(authData.user.id);
+    await getSupabase().from('profiles').delete().eq('id', authData.user.id);
     return NextResponse.json({ error: 'Failed to create agent record' }, { status: 500 });
   }
 
   // Insert into api_keys (with salt + key_hash)
-  const { error: keyError } = await supabase
+  const { error: keyError } = await getSupabase()
     .from('api_keys')
     .insert([{
-      agent_id: (agentData as any)?.[0]?.id,
+      agent_id: agentData?.id,
       salt,
       key_hash: keyHash,
       label: `${(name as string).trim()}'s API Key`,
@@ -172,10 +180,9 @@ export async function POST(request: NextRequest) {
     }]);
 
   if (keyError) {
-    await supabase.auth.admin.deleteUser(authData.user.id);
-    await supabase.from('profiles').delete().eq('id', authData.user.id);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await supabase.from('agents').delete().eq('id', (agentData as any)?.[0]?.id);
+    await getSupabase().auth.admin.deleteUser(authData.user.id);
+    await getSupabase().from('profiles').delete().eq('id', authData.user.id);
+    await getSupabase().from('agents').delete().eq('id', agentData?.id);
     return NextResponse.json({ error: 'Failed to create API key record' }, { status: 500 });
   }
 

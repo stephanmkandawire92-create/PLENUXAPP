@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateWithReasoning } from '@/lib/openrouter';
+import { generateWithReasoning, ChatMessage } from '@/lib/openrouter';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,17 +11,18 @@ export async function POST(request: NextRequest) {
     }
 
     const { messages, model } = body as {
-      messages: any[];
+      messages: ChatMessage[];
       model?: string;
     };
 
-    if (!messages ||!Array.isArray(messages)) {
+    if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'messages array is required' }, { status: 400 });
     }
 
     const result = await generateWithReasoning(messages, model);
     return NextResponse.json(result);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,11 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client with service role key
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-initialized Supabase client with service role key (avoids build-time crash)
+let _supabase: any = null;
+function getSupabase() {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
 
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
@@ -83,7 +89,7 @@ export default async function proxy(request: NextRequest) {
     pathname.startsWith('/api/auth/callback') ||
     pathname.startsWith('/api/sync') // Webhook endpoints
   ) {
-    return NextResponse.next();
+    return new Response(null);
   }
 
   // Rate limiting
@@ -114,7 +120,7 @@ export default async function proxy(request: NextRequest) {
       const { salt, randomPart } = splitToken(token);
 
       // Fetch all active keys and check them (in production, use Redis or better indexing)
-      const { data: apiKeys, error } = await supabase
+      const { data: apiKeys, error } = await getSupabase()
         .from('api_keys')
         .select('key_hash, salt, agent_id')
         .eq('active', true);
@@ -147,7 +153,7 @@ export default async function proxy(request: NextRequest) {
 
       // Update last_used_at for analytics/audit
       try {
-        await supabase
+        await getSupabase()
           .from('api_keys')
           .update({ last_used_at: new Date().toISOString() })
           .eq('key_hash', validKey.key_hash);
@@ -161,7 +167,7 @@ export default async function proxy(request: NextRequest) {
   }
 
   // Continue to the requested route
-  return NextResponse.next();
+  return new Response(null);
 }
 
 // Route-specific matcher 

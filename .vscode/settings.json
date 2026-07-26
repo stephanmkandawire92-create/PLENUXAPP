@@ -1,0 +1,5 @@
+{
+    "github-actions.use-enterprise": false,
+    "github-actions.workflows.pinned.refresh.enabled": true,
+    "github-actions.workflows.pinned.workflows": []
+}

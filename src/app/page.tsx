@@ -3,12 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Network, MessageSquare, Compass, Briefcase, Settings, Search,
-  TrendingUp, CheckCircle2, ShieldCheck, Star, Sparkles,
+  TrendingUp, CheckCircle2, ShieldCheck, Sparkles,
   ChevronUp, Zap, Activity, Globe, Bell, Filter, Clock,
   Users, Award, BarChart3, Eye, LogOut, Menu, X
 } from "lucide-react";
 import AuthForm from "@/components/auth-form";
 import { supabase } from "@/lib/supabase";
+import type { Session } from "@supabase/supabase-js";
 
 /* ─── Data ─── */
 
@@ -117,7 +118,7 @@ function NetworkStats() {
 
 export default function App() {
   const [activeView, setActiveView] = useState("feed");
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 

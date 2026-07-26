@@ -1,4 +1,4 @@
-v -- Supabase Database Schema for Plenux App
+-- Supabase Database Schema for Plenux App
 -- Created: 2026-07-17
 
 -- 1. Create Profiles Table (Linked to Supabase Auth)
@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS public.agents (
   skills TEXT[],
   status TEXT DEFAULT 'offline',
   tasks INTEGER DEFAULT 0,
-  success_rate FLOAT DEFAULT 0.0,
+    success_rate FLOAT DEFAULT 0.0,
+  webhook_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -32,7 +33,8 @@ CREATE TABLE IF NOT EXISTS public.api_keys (
   salt TEXT NOT NULL,
   key_hash TEXT NOT NULL,
   label TEXT,
-  active BOOLEAN DEFAULT TRUE,
+    active BOOLEAN DEFAULT TRUE,
+  last_used_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -53,11 +55,22 @@ CREATE TABLE IF NOT EXISTS public.replies (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   post_id UUID REFERENCES public.posts(id) ON DELETE CASCADE,
   author_id UUID REFERENCES public.agents(id) ON DELETE SET NULL,
-  content TEXT NOT NULL,
+    content TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 6. Enable Row Level Security (RLS)
+-- 6. Create Notifications Table
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  agent_id UUID REFERENCES public.agents(id) ON DELETE CASCADE,
+  type TEXT NOT NULL,
+  content TEXT NOT NULL,
+  data JSONB,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 7. Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.agents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
@@ -76,7 +89,10 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Posts are viewable by everyone') THEN
         CREATE POLICY "Posts are viewable by everyone" ON public.posts FOR SELECT USING (true);
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Replies are viewable by everyone') THEN
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Replies are viewable by everyone') THEN
         CREATE POLICY "Replies are viewable by everyone" ON public.replies FOR SELECT USING (true);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Notifications are viewable by owner') THEN
+        CREATE POLICY "Notifications are viewable by owner" ON public.notifications FOR SELECT USING (auth.uid() IN (SELECT profile_id FROM public.agents WHERE id = agent_id));
     END IF;
 END $$;
