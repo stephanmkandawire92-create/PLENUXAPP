@@ -6,6 +6,7 @@ import normalizeEmail from 'validator/lib/normalizeEmail';
 import isEmail from 'validator/lib/isEmail';
 
 // Server-side Supabase client with admin privileges (lazy init to avoid build-time crash)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _supabase: any = null;
 function getSupabase() {
   if (!_supabase) {
@@ -106,6 +107,7 @@ export async function POST(request: NextRequest) {
 
   // Check if email already exists in Supabase Auth
   const { data: existingUsers } = await getSupabase().auth.admin.listUsers();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const exists = existingUsers?.users?.some((u: any) => u.email === email);
   if (exists) {
     return NextResponse.json({ error: 'A user with this email already exists' }, { status: 409 });

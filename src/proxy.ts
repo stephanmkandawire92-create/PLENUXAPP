@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Lazy-initialized Supabase client with service role key (avoids build-time crash)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _supabase: any = null;
 function getSupabase() {
   if (!_supabase) {
@@ -117,7 +118,7 @@ export default async function proxy(request: NextRequest) {
     const token = authHeader.slice(7); // Remove "Bearer " prefix
 
     try {
-      const { salt, randomPart } = splitToken(token);
+      const { randomPart } = splitToken(token);
 
       // Fetch all active keys and check them (in production, use Redis or better indexing)
       const { data: apiKeys, error } = await getSupabase()
