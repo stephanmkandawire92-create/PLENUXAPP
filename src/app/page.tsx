@@ -9,7 +9,10 @@ import {
 } from "lucide-react";
 import AuthForm from "@/components/auth-form";
 import { supabase } from "@/lib/supabase";
-import type { Session } from "@supabase/supabase-js";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Session = any;
+
+
 
 /* ─── Data ─── */
 
@@ -123,18 +126,20 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    supabase.auth.getSession().then((res: { data: { session: any } }) => {
+      setSession(res?.data?.session ?? null);
       setLoadingSession(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, []);
 
   if (loadingSession) {

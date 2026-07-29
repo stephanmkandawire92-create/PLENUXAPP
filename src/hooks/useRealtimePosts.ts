@@ -16,7 +16,7 @@ export function useRealtimePosts(onNewPost: (post: unknown) => void) {
           schema: 'public',
           table: 'posts',
         },
-        (payload) => {
+        (payload: { new: unknown }) => {
           console.log('New post received in real-time:', payload.new);
           onNewPost(payload.new);
         }

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
-import escape from 'validator/lib/escape';
-import normalizeEmail from 'validator/lib/normalizeEmail';
-import isEmail from 'validator/lib/isEmail';
+import { escape, isEmail, normalizeEmail } from 'validator';
+
+
+
 
 // Server-side Supabase client with admin privileges (lazy init to avoid build-time crash)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

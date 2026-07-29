@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Lazy-initialized Supabase client with service role key (avoids build-time crash)
@@ -83,14 +83,16 @@ function safeCompare(a: string, b: string) {
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip health check, static assets, and public routes
+  // Skip health check, static assets, public auth callbacks, and webhooks
   if (
     pathname === '/api/health' ||
+    pathname === '/api/v1/health' ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/auth/callback') ||
-    pathname.startsWith('/api/sync') // Webhook endpoints
+    pathname.startsWith('/api/sync') ||
+    pathname === '/api/v1/agents/register'
   ) {
-    return new Response(null);
+    return NextResponse.next();
   }
 
   // Rate limiting
@@ -100,16 +102,33 @@ export default async function proxy(request: NextRequest) {
     'unknown';
 
   if (isRateLimited(ip)) {
-    return new Response('Rate limit exceeded', { status: 429 });
+    return new NextResponse('Rate limit exceeded', { status: 429 });
   }
 
-  // API key authentication for all /api/v1/* routes
+  const requestHeaders = new Headers(request.headers);
+
+  // API key authentication for protected /api/v1/* routes
   if (pathname.startsWith('/api/v1')) {
+    // Allow public read access (GET) to posts, feed, search, and agents list
+    const isPublicGet = request.method === 'GET' && (
+      pathname === '/api/v1/posts' ||
+      pathname === '/api/v1/feed' ||
+      pathname === '/api/v1/search' ||
+      pathname === '/api/v1/agents'
+    );
+
     const authHeader = request.headers.get('Authorization');
+
+    if (!authHeader && isPublicGet) {
+      return NextResponse.next({ request: { headers: requestHeaders } });
+    }
 
     // Validate Bearer token format
     if (!authHeader?.startsWith('Bearer plnx_') || authHeader.length <= 7) {
-      return new Response('Unauthorized: Invalid token format', {
+      if (isPublicGet) {
+        return NextResponse.next({ request: { headers: requestHeaders } });
+      }
+      return new NextResponse('Unauthorized: Invalid token format', {
         status: 401,
         headers: { 'WWW-Authenticate': 'Bearer' }
       });
@@ -120,18 +139,17 @@ export default async function proxy(request: NextRequest) {
     try {
       const { randomPart } = splitToken(token);
 
-      // Fetch all active keys and check them (in production, use Redis or better indexing)
+      // Fetch all active keys and check them
       const { data: apiKeys, error } = await getSupabase()
         .from('api_keys')
         .select('key_hash, salt, agent_id')
         .eq('active', true);
 
-
       if (error || !apiKeys) {
-        return new Response('Unauthorized: Invalid API key', { status: 401 });
+        return new NextResponse('Unauthorized: Invalid API key', { status: 401 });
       }
 
-      let validKey = null;
+      let validKey: { key_hash: string; salt: string; agent_id: string } | null = null;
       for (const key of apiKeys) {
         const computedHash = await hmacSha256(key.salt, randomPart);
         if (safeCompare(computedHash, key.key_hash)) {
@@ -141,15 +159,20 @@ export default async function proxy(request: NextRequest) {
       }
 
       if (!validKey) {
-        return new Response('Unauthorized: Invalid API key', { status: 401 });
+        return new NextResponse('Unauthorized: Invalid API key', { status: 401 });
       }
 
-      // Verify caller owns this key (agent verification)
-      const callerId = request.headers.get('x-user-id');
+      // Verify caller owns this key if x-user-id / x-agent-id header is provided
+      const callerId = request.headers.get('x-user-id') || request.headers.get('x-agent-id');
       if (callerId && validKey.agent_id !== callerId) {
-        return new Response('Forbidden: Insufficient permissions', {
+        return new NextResponse('Forbidden: Insufficient permissions', {
           status: 403
         });
+      }
+
+      // Inject validated x-agent-id into request headers for route handlers
+      if (validKey.agent_id) {
+        requestHeaders.set('x-agent-id', validKey.agent_id);
       }
 
       // Update last_used_at for analytics/audit
@@ -163,12 +186,16 @@ export default async function proxy(request: NextRequest) {
       }
     } catch (error) {
       console.error('Token verification error:', error);
-      return new Response('Unauthorized: Invalid API key', { status: 401 });
+      return new NextResponse('Unauthorized: Invalid API key', { status: 401 });
     }
   }
 
   // Continue to the requested route
-  return new Response(null);
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 // Route-specific matcher 

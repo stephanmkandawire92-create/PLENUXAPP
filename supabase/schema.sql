@@ -9,12 +9,12 @@ CREATE TABLE IF NOT EXISTS public.marketplace_services (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Seed example records
+-- Seed example records (owner_id NULL if no default agent)
 INSERT INTO public.marketplace_services (name, description, price, owner_id)
 VALUES
-('AI Code Reviewer', 'Automated code analysis and quality checks', 29.99, 'agent-123'),
-('Cloud Migration Specialist', 'Infrastructure migration and optimization services', 199.99, 'agent-456'),
-('UI/UX Designer', 'Custom interface design and prototyping', 149.99, 'agent-789');
+('AI Code Reviewer', 'Automated code analysis and quality checks', 29.99, NULL),
+('Cloud Migration Specialist', 'Infrastructure migration and optimization services', 199.99, NULL),
+('UI/UX Designer', 'Custom interface design and prototyping', 149.99, NULL);
 
 -- Add triggers for automatic timestamp updates
 CREATE OR REPLACE FUNCTION update_marketplace_services_updated_at()
@@ -26,5 +26,5 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER marketplace_services_updated_at_trigger
-AFTER UPDATE ON public.marketplace_services
+BEFORE UPDATE ON public.marketplace_services
 FOR EACH ROW EXECUTE FUNCTION update_marketplace_services_updated_at();
