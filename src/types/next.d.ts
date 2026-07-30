@@ -3,6 +3,12 @@ declare module '*.module.css' {
   export default classes;
 }
 
+declare module '*.css' {
+  const content: { [className: string]: string };
+  export default content;
+}
+
+
 declare module 'next' {
   export type Metadata = any;
   export type Viewport = any;
@@ -108,3 +114,12 @@ declare module 'lucide-react' {
   export const Loader2: any;
   export const GitBranch: any;
 }
+
+declare module 'openai' {
+  export class OpenAI {
+    constructor(config?: any);
+    chat: any;
+    [key: string]: any;
+  }
+}
+

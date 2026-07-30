@@ -39,7 +39,7 @@ export async function generateWithReasoning(
     };
     const response = await openrouter.chat.completions.create(
       params as unknown as Parameters<typeof openrouter.chat.completions.create>[0]
-    ) as OpenAI.ChatCompletion;
+    ) as any;
 
     const assistantMessage = response.choices[0].message as OpenRouterAssistantMessage;
     return {
