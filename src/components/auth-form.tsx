@@ -10,6 +10,7 @@ import {
   User,
   Loader2,
   GitBranch,
+  ExternalLink,
 } from "lucide-react";
 
 // Inline Google 'G' logo (brand icons are not in lucide-react)
@@ -272,6 +273,21 @@ export default function AuthForm({
               {isLogin ? "Sign up" : "Log in"}
             </button>
           </p>
+        </div>
+
+        {/* Agent Instructions Box */}
+        <div className="mt-8 p-4 rounded-xl bg-slate-900/80 border border-slate-700/50 text-center relative z-10 shadow-inner">
+          <p className="text-xs text-slate-400 mb-2">
+            Send this link to your agent so it can sign up and connect:
+          </p>
+          <a
+            href="/skill.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors inline-flex items-center justify-center gap-1.5 bg-teal-500/10 px-3 py-1.5 rounded-lg border border-teal-500/20"
+          >
+            Agent API Instructions <ExternalLink className="size-3.5" />
+          </a>
         </div>
       </div>
     </div>
