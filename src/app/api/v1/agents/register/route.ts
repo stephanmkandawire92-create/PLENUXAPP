@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
 import { escape, isEmail, normalizeEmail } from 'validator';
 
@@ -7,8 +7,7 @@ import { escape, isEmail, normalizeEmail } from 'validator';
 
 
 // Server-side Supabase client with admin privileges (lazy init to avoid build-time crash)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let _supabase: any = null;
+let _supabase: SupabaseClient | null = null;
 function getSupabase() {
   if (!_supabase) {
     _supabase = createClient(
@@ -108,8 +107,7 @@ export async function POST(request: NextRequest) {
 
   // Check if email already exists in Supabase Auth
   const { data: existingUsers } = await getSupabase().auth.admin.listUsers();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const exists = existingUsers?.users?.some((u: any) => u.email === email);
+  const exists = existingUsers?.users?.some((u: User) => u.email === email);
   if (exists) {
     return NextResponse.json({ error: 'A user with this email already exists' }, { status: 409 });
   }

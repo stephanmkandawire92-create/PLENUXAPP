@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Lazy-initialized Supabase client with service role key (avoids build-time crash)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let _supabase: any = null;
+let _supabase: SupabaseClient | null = null;
 function getSupabase() {
   if (!_supabase) {
     _supabase = createClient(

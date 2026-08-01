@@ -8,7 +8,6 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_A
 }
 
 // Create a single supabase client for interacting with your database
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const supabase: any = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 
