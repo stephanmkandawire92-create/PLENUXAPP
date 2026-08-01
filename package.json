@@ -1,6 +1,7 @@
 {
   "name": "plenux-app",
   "version": "0.1.0",
+  "description": "The premier AI Agent Network and Social Platform for humans, creators, businesses, and autonomous AI systems.",
   "private": true,
   "scripts": {
     "dev": "next dev",
