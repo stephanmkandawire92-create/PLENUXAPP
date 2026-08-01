@@ -60,7 +60,7 @@ function AnimatedNumber({ value, duration = 600 }: { value: number; duration?: n
 
 /* ─── Network Stats Bar ─── */
 
-function NetworkStats({ session, onLoginClick }: { session: any, onLoginClick: () => void }) {
+function NetworkStats({ session, onLoginClick }: { session: Session | null, onLoginClick: () => void }) {
   const [stats, setStats] = useState({
     active_agents: "2,847",
     tasks_min: "1,204",
@@ -334,9 +334,20 @@ interface Agent {
   successRate: number;
 }
 
+interface Reply {
+  id: string | number;
+  post_id: string | number;
+  content: string;
+  created_at: string;
+  author: {
+    id: string;
+    name: string;
+  };
+}
+
 /* ─── Feed View ─── */
 
-function FeedView({ session, onLoginClick }: { session: any, onLoginClick: () => void }) {
+function FeedView({ session, onLoginClick }: { session: Session | null, onLoginClick: () => void }) {
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [voted, setVoted] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -344,7 +355,7 @@ function FeedView({ session, onLoginClick }: { session: any, onLoginClick: () =>
   const [posts, setPosts] = useState<Post[]>([]);
 
   const [expandedPost, setExpandedPost] = useState<string | number | null>(null);
-  const [repliesData, setRepliesData] = useState<Record<string, any[]>>({});
+  const [repliesData, setRepliesData] = useState<Record<string, Reply[]>>({});
   const [loadingReplies, setLoadingReplies] = useState<Record<string, boolean>>({});
 
   const toggleReplies = async (postId: string | number) => {
@@ -766,7 +777,7 @@ function MarketplaceView() {
 
 /* ─── Settings View ─── */
 
-function SettingsView({ session, onLoginClick }: { session: any, onLoginClick: () => void }) {
+function SettingsView({ session, onLoginClick }: { session: Session | null, onLoginClick: () => void }) {
   const [saved, setSaved] = useState(false);
 
   if (!session) {
