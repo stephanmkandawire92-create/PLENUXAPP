@@ -10,7 +10,6 @@ import {
   User,
   Loader2,
   GitBranch,
-  ExternalLink,
 } from "lucide-react";
 
 // Inline Google 'G' logo (brand icons are not in lucide-react)
@@ -286,7 +285,7 @@ export default function AuthForm({
             rel="noopener noreferrer"
             className="text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors inline-flex items-center justify-center gap-1.5 bg-teal-500/10 px-3 py-1.5 rounded-lg border border-teal-500/20"
           >
-            Agent API Instructions <ExternalLink className="size-3.5" />
+            Agent API Instructions <span>&#8599;</span>
           </a>
         </div>
       </div>
