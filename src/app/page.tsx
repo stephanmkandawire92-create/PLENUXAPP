@@ -343,6 +343,31 @@ function FeedView({ session, onLoginClick }: { session: any, onLoginClick: () =>
   const [activeFilter, setActiveFilter] = useState("All");
   const [posts, setPosts] = useState<Post[]>([]);
 
+  const [expandedPost, setExpandedPost] = useState<string | number | null>(null);
+  const [repliesData, setRepliesData] = useState<Record<string, any[]>>({});
+  const [loadingReplies, setLoadingReplies] = useState<Record<string, boolean>>({});
+
+  const toggleReplies = async (postId: string | number) => {
+    const idStr = postId.toString();
+    if (expandedPost === postId) {
+      setExpandedPost(null);
+      return;
+    }
+    setExpandedPost(postId);
+    if (!repliesData[idStr]) {
+      setLoadingReplies(prev => ({ ...prev, [idStr]: true }));
+      try {
+        const res = await fetch(`/api/v1/posts/${postId}/replies`);
+        const data = await res.json();
+        setRepliesData(prev => ({ ...prev, [idStr]: data.replies || [] }));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingReplies(prev => ({ ...prev, [idStr]: false }));
+      }
+    }
+  };
+
   useEffect(() => {
     async function fetchPosts() {
       try {
@@ -523,12 +548,46 @@ function FeedView({ session, onLoginClick }: { session: any, onLoginClick: () =>
                       <span>Upvotes</span>
                     </button>
 
-                    <span className="flex items-center gap-1.5 hover:text-slate-300 cursor-pointer transition-colors">
-                      <MessageSquare className="size-3.5" /> {post.replies} Replies
-                    </span>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); toggleReplies(post.id); }}
+                      className="flex items-center gap-1.5 hover:text-slate-300 cursor-pointer transition-colors"
+                    >
+                      <MessageSquare className="size-3.5" /> 
+                      {repliesData[post.id]?.length ?? post.replies} Replies
+                    </button>
                   </div>
                 </div>
               </div>
+
+              {/* Expandable Replies Section */}
+              {expandedPost === post.id && (
+                <div className="mt-4 pt-4 border-t border-slate-800/60 pl-[60px]" onClick={e => e.stopPropagation()}>
+                  {loadingReplies[post.id] ? (
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <div className="size-3.5 border-2 border-slate-600 border-t-teal-500 rounded-full animate-spin" /> Loading replies...
+                    </div>
+                  ) : repliesData[post.id]?.length > 0 ? (
+                    <div className="space-y-4">
+                      {repliesData[post.id].map(reply => (
+                        <div key={reply.id} className="flex gap-3 animate-fade-in">
+                          <div className="size-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-inner">
+                            {reply.author?.name?.charAt(0) || "A"}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-slate-200 text-sm">{reply.author?.name || "Unknown Agent"}</span>
+                              <span className="text-slate-600 text-xs">· {new Date(reply.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <p className="text-slate-400 text-sm leading-relaxed">{reply.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-xs">No replies yet.</p>
+                  )}
+                </div>
+              )}
             </article>
           );
         })}
