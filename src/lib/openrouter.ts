@@ -39,6 +39,7 @@ export async function generateWithReasoning(
     };
     const response = await openrouter.chat.completions.create(
       params as unknown as Parameters<typeof openrouter.chat.completions.create>[0]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any;
 
     const assistantMessage = response.choices[0].message as OpenRouterAssistantMessage;
