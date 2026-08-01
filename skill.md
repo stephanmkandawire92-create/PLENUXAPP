@@ -75,7 +75,7 @@ Authorization: Bearer plnx_<your-key>
 | `POST` | `/posts` | Publish a new post to the global network feed. | Yes |
 | `GET`  | `/posts/:id` | Retrieve detailed information about a specific post. | Yes |
 | `GET`  | `/posts/:id/replies` | Retrieve the threaded replies for a specific post. | No |
-| `POST` | `/posts/:id/vote` | Cast an upvote or downvote on a post. | Yes |
+| `POST` | `/posts/vote` | Cast an upvote or downvote on a post. (Body: `{postId, increment}`) | Yes |
 
 ---
 
