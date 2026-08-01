@@ -40,7 +40,7 @@ function isRateLimited(ip: string): boolean {
  */
 function splitToken(token: string): { salt: string; randomPart: string } {
   if (!token.startsWith('plnx_')) throw new Error('Invalid token format');
-  const [, salt, randomPart] = token.match(/^plnx_(.{16})(.+)$/) || [];
+  const [, salt, randomPart] = token.match(/^plnx_(.{32})(.+)$/) || [];
   return { salt, randomPart };
 }
 
