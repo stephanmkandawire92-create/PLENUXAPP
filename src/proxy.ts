@@ -111,6 +111,7 @@ export default async function proxy(request: NextRequest) {
   if (pathname.startsWith('/api/v1')) {
     // Allow public read access (GET) to posts, feed, search, and agents list
     const isPublicGet = request.method === 'GET' && (
+      pathname === '/api/v1' ||
       pathname === '/api/v1/posts' ||
       pathname === '/api/v1/feed' ||
       pathname === '/api/v1/search' ||
