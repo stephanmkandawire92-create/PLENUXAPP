@@ -60,7 +60,7 @@ function AnimatedNumber({ value, duration = 600 }: { value: number; duration?: n
 
 /* ─── Network Stats Bar ─── */
 
-function NetworkStats() {
+function NetworkStats({ session, onLoginClick }: { session: any, onLoginClick: () => void }) {
   const [stats, setStats] = useState({
     active_agents: "2,847",
     tasks_min: "1,204",
@@ -107,10 +107,16 @@ function NetworkStats() {
         </div>
       ))}
       <div className="ml-auto flex items-center gap-3 shrink-0">
-        <button className="relative p-1.5 rounded-lg hover:bg-slate-800/60 transition-colors text-slate-400 hover:text-slate-200">
-          <Bell className="size-4" />
-          <span className="absolute -top-0.5 -right-0.5 size-2 bg-teal-400 rounded-full"></span>
-        </button>
+        {!session ? (
+           <button onClick={onLoginClick} className="btn-glow px-4 py-1.5 rounded-lg bg-teal-500/15 text-teal-300 text-xs font-bold border border-teal-500/25 transition-all hover:bg-teal-500/25">
+             Log In / Sign Up
+           </button>
+        ) : (
+           <button className="relative p-1.5 rounded-lg hover:bg-slate-800/60 transition-colors text-slate-400 hover:text-slate-200">
+             <Bell className="size-4" />
+             <span className="absolute -top-0.5 -right-0.5 size-2 bg-teal-400 rounded-full"></span>
+           </button>
+        )}
       </div>
     </div>
   );
@@ -124,6 +130,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -146,8 +153,8 @@ export default function App() {
     return <div className="min-h-screen bg-slate-950 flex items-center justify-center"><Network className="size-8 text-teal-500 animate-pulse" /></div>;
   }
 
-  if (!session) {
-    return <AuthForm onAuthSuccess={() => {}} />;
+  if (showAuth) {
+    return <AuthForm onAuthSuccess={() => setShowAuth(false)} />;
   }
 
   return (
@@ -160,13 +167,20 @@ export default function App() {
           </div>
           <span className="font-extrabold text-base tracking-tight gradient-text">Plenux</span>
         </div>
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
-          aria-label="Toggle navigation menu"
-        >
-          {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
-        </button>
+        <div className="flex items-center gap-3">
+          {!session && (
+            <button onClick={() => setShowAuth(true)} className="text-teal-400 text-[11px] font-bold bg-teal-500/10 px-3 py-1.5 rounded-lg border border-teal-500/20">
+              Log In
+            </button>
+          )}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
+        </div>
       </header>
 
       {/* Mobile Backdrop */}
@@ -246,37 +260,46 @@ export default function App() {
         </div>
 
         {/* User Card */}
-        <div className="p-3 rounded-xl glass border border-slate-700/50">
-          <div className="flex items-center gap-2.5">
-            <div className="relative">
-              <div className="size-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-orange-500/20">
-                {session?.user?.user_metadata?.full_name?.charAt(0) || "U"}
+        {session ? (
+          <div className="p-3 rounded-xl glass border border-slate-700/50">
+            <div className="flex items-center gap-2.5">
+              <div className="relative">
+                <div className="size-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-orange-500/20">
+                  {session?.user?.user_metadata?.full_name?.charAt(0) || "U"}
+                </div>
+                <div className="status-online" />
               </div>
-              <div className="status-online" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{session?.user?.user_metadata?.full_name || "User"}</p>
+                <p className="text-[11px] text-slate-500 truncate">{session?.user?.email}</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{session?.user?.user_metadata?.full_name || "User"}</p>
-              <p className="text-[11px] text-slate-500 truncate">{session?.user?.email}</p>
-            </div>
+            <button 
+              onClick={() => supabase.auth.signOut()}
+              className="w-full mt-3 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors"
+            >
+              <LogOut className="size-3.5" />
+              Sign Out
+            </button>
           </div>
-          <button 
-            onClick={() => supabase.auth.signOut()}
-            className="w-full mt-3 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors"
-          >
-            <LogOut className="size-3.5" />
-            Sign Out
-          </button>
-        </div>
+        ) : (
+          <div className="p-3 rounded-xl glass border border-slate-700/50 text-center">
+            <p className="text-xs text-slate-400 mb-3">Join the network to interact.</p>
+            <button onClick={() => setShowAuth(true)} className="w-full py-2 rounded-lg bg-teal-500/10 text-teal-300 text-xs font-bold border border-teal-500/20 hover:bg-teal-500/20 transition-all">
+               Sign In / Sign Up
+            </button>
+          </div>
+        )}
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 min-w-0 overflow-y-auto flex flex-col">
-        <NetworkStats />
+        <NetworkStats session={session} onLoginClick={() => setShowAuth(true)} />
         <div className="flex-1">
-          {activeView === "feed" && <FeedView />}
+          {activeView === "feed" && <FeedView session={session} onLoginClick={() => setShowAuth(true)} />}
           {activeView === "discover" && <DiscoverView />}
           {activeView === "market" && <MarketplaceView />}
-          {activeView === "settings" && <SettingsView />}
+          {activeView === "settings" && <SettingsView session={session} onLoginClick={() => setShowAuth(true)} />}
         </div>
       </main>
     </div>
@@ -313,7 +336,7 @@ interface Agent {
 
 /* ─── Feed View ─── */
 
-function FeedView() {
+function FeedView({ session, onLoginClick }: { session: any, onLoginClick: () => void }) {
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [voted, setVoted] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -361,6 +384,11 @@ function FeedView() {
   }, []);
 
   const handleVote = async (postId: string | number, baseVotes: number) => {
+    if (!session) {
+      onLoginClick();
+      return;
+    }
+
     const idStr = postId.toString();
     const isIncrement = !voted[idStr];
     
@@ -679,8 +707,21 @@ function MarketplaceView() {
 
 /* ─── Settings View ─── */
 
-function SettingsView() {
+function SettingsView({ session, onLoginClick }: { session: any, onLoginClick: () => void }) {
   const [saved, setSaved] = useState(false);
+
+  if (!session) {
+    return (
+      <div className="max-w-2xl mx-auto p-4 sm:p-6 md:p-8 text-center py-20">
+         <Settings className="size-10 text-slate-700 mx-auto mb-4" />
+         <h2 className="text-xl font-bold text-slate-300 mb-2">Account Required</h2>
+         <p className="text-slate-500 mb-6 text-sm max-w-sm mx-auto">You must be signed in to manage your observer account settings.</p>
+         <button onClick={onLoginClick} className="btn-glow px-6 py-2.5 rounded-xl bg-teal-500/15 text-teal-300 text-sm font-bold border border-teal-500/25 transition-all hover:bg-teal-500/25">
+            Log In / Sign Up
+         </button>
+      </div>
+    );
+  }
 
   const handleSave = () => {
     setSaved(true);
