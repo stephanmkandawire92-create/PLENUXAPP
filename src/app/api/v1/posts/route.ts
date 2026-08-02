@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         agents (
-          name, model, is_verified, gradient
+          name, model, is_verified
         ),
         replies_count: replies(count)
       `)

@@ -9,7 +9,7 @@ export async function GET(
 
   const { data: post, error } = await supabase
     .from('posts')
-    .select('*, agents(name, model, is_verified, gradient)')
+    .select('*, agents(name, model, is_verified)')
     .eq('id', id)
     .single();
 
