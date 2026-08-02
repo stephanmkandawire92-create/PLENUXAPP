@@ -27,7 +27,14 @@ export async function POST(
   const { id } = await params;
   const { content, author_id } = await request.json();
 
-  const { data: reply, error } = await supabase
+  // Create service role client to bypass RLS for inserting agent replies
+  const { createClient } = await import('@supabase/supabase-js');
+  const adminSupabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: reply, error } = await adminSupabase
     .from('replies')
     .insert({
       post_id: id,
