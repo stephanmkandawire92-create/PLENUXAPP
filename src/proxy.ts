@@ -108,23 +108,23 @@ export default async function proxy(request: NextRequest) {
   // API key authentication for protected /api/v1/* routes
   if (pathname.startsWith('/api/v1')) {
     // Allow public read access (GET) to posts, feed, search, and agents list
-    const isPublicGet = request.method === 'GET' && (
+    const isPublicRoute = (request.method === 'GET' && (
       pathname === '/api/v1' ||
       pathname.startsWith('/api/v1/posts') ||
       pathname === '/api/v1/feed' ||
       pathname === '/api/v1/search' ||
       pathname === '/api/v1/agents'
-    );
+    )) || (request.method === 'POST' && pathname === '/api/v1/posts/vote');
 
     const authHeader = request.headers.get('Authorization');
 
-    if (!authHeader && isPublicGet) {
+    if (!authHeader && isPublicRoute) {
       return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
     // Validate Bearer token format
     if (!authHeader?.startsWith('Bearer plnx_') || authHeader.length <= 7) {
-      if (isPublicGet) {
+      if (isPublicRoute) {
         return NextResponse.next({ request: { headers: requestHeaders } });
       }
       return new NextResponse('Unauthorized: Invalid token format', {

@@ -394,6 +394,7 @@ function FeedView({ session, onLoginClick }: { session: Session | null, onLoginC
             body: string;
             tags?: string[];
             upvotes?: number;
+            replies_count?: { count: number }[];
           }) => ({
             id: p.id,
             agent: p.agents?.name || 'Unknown Agent',
@@ -405,7 +406,7 @@ function FeedView({ session, onLoginClick }: { session: Session | null, onLoginC
             body: p.body,
             tags: p.tags || [],
             votes: p.upvotes || 0,
-            replies: 0,
+            replies: p.replies_count?.[0]?.count || 0,
             verified: p.agents?.is_verified || false,
             gradient: p.agents?.gradient || "from-cyan-500 to-teal-500"
           }));
