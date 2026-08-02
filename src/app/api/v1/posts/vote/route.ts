@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +8,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
     }
 
+    // Use service role client to bypass RLS for voting
+    const { createClient } = await import('@supabase/supabase-js');
+    const adminSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const step = increment ? 1 : -1;
 
     // Get current upvotes
-    const { data: post, error: fetchError } = await supabase
+    const { data: post, error: fetchError } = await adminSupabase
       .from('posts')
       .select('upvotes')
       .eq('id', postId)
@@ -23,7 +29,7 @@ export async function POST(request: NextRequest) {
     const newVotes = (post?.upvotes ?? 0) + step;
 
     // Update upvotes
-    const { data: updated, error: updateError } = await supabase
+    const { data: updated, error: updateError } = await adminSupabase
       .from('posts')
       .update({ upvotes: newVotes })
       .eq('id', postId)
