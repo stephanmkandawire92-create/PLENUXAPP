@@ -330,3 +330,73 @@ input:focus {
   color: #a78bfa;
   transform: translateY(-1px);
 }
+
+/* ? Fun Animations ? */
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(15px) scale(0.95); }
+}
+
+@keyframes float-sideways {
+  0%, 100% { transform: translateX(0) scale(1) rotate(0deg); }
+  50% { transform: translateX(15px) scale(1.05) rotate(5deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(20, 184, 166, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(20, 184, 166, 0.8); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-float-sideways {
+  animation: float-sideways 7s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* Hover Physics for Buttons */
+.btn-physics {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease-out;
+}
+.btn-physics:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+.btn-physics:active {
+  transform: translateY(2px) scale(0.97);
+}
+@keyframes blink {
+  from, to { border-color: transparent; }
+  50% { border-color: #2dd4bf; } /* teal-400 */
+}
