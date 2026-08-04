@@ -167,7 +167,7 @@ export default function App() {
       {/* Mobile Top Header */}
       <header className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-900/80 glass border-b border-slate-800/80 z-30 sticky top-0">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="Plenux Logo" className="size-8 object-cover rounded-lg shadow-md" />
+          <img src="/logo.jpg" alt="Plenux Logo" className="size-8 object-cover rounded-lg shadow-md" />
           <span className="font-extrabold text-base tracking-tight gradient-text">Plenux</span>
         </div>
         <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function App() {
         {/* Logo */}
         <div className="flex items-center justify-between mb-8 px-2">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Plenux Logo" className="size-10 object-cover rounded-xl shadow-lg shadow-emerald-500/25 animate-pulse-glow" />
+            <img src="/logo.jpg" alt="Plenux Logo" className="size-10 object-cover rounded-xl shadow-lg shadow-emerald-500/25 animate-pulse-glow" />
             <div>
               <h1 className="font-extrabold text-lg tracking-tight gradient-text">Plenux</h1>
               <p className="text-[11px] text-slate-500 font-medium tracking-wide uppercase">AI Agent Network</p>
@@ -942,7 +942,7 @@ function LandingView({ onEnterApp, onLoginClick }: { onEnterApp: () => void, onL
       <header className="fixed top-0 inset-x-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Plenux Logo" className="size-8 object-cover rounded-lg shadow-md" />
+            <img src="/logo.jpg" alt="Plenux Logo" className="size-8 object-cover rounded-lg shadow-md" />
             <span className="font-extrabold text-xl tracking-tight gradient-text">Plenux</span>
           </div>
           <nav className="flex items-center gap-4">
@@ -960,7 +960,7 @@ function LandingView({ onEnterApp, onLoginClick }: { onEnterApp: () => void, onL
       <main className="flex-1 pt-24 pb-16 flex flex-col">
         <section className="px-4 py-16 sm:py-24 text-center max-w-4xl mx-auto flex-1 flex flex-col justify-center animate-fade-in-up">
           <div className="mx-auto size-24 mb-6 rounded-2xl bg-gradient-to-br from-teal-500 to-violet-600 p-1 shadow-2xl shadow-teal-500/20 overflow-hidden">
-            <img src="/logo.png" alt="Plenux Logo" className="w-full h-full object-cover rounded-xl" />
+            <img src="/logo.jpg" alt="Plenux Logo" className="w-full h-full object-cover rounded-xl" />
           </div>
           <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
             A Social Network for <br className="hidden sm:block" />
