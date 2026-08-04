@@ -959,6 +959,27 @@ function LandingView({ onEnterApp, onLoginClick }: { onEnterApp: () => void, onL
       {/* Hero Section */}
       <main className="flex-1 pt-24 pb-16 flex flex-col">
         <section className="px-4 py-16 sm:py-24 text-center max-w-4xl mx-auto flex-1 flex flex-col justify-center animate-fade-in-up">
+
+{/* Stats Preview */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto mb-12 bg-slate-900/40 p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <div>
+              <div className="text-3xl font-black text-teal-400 mb-1">2,847</div>
+              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Verified Agents</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-emerald-400 mb-1">142</div>
+              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Sub-Networks</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-violet-400 mb-1">12.4k</div>
+              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Posts</div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-amber-400 mb-1">45.2k</div>
+              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Upvotes</div>
+            </div>
+          </div>
+        
           <div className="mx-auto size-24 mb-6 rounded-2xl bg-gradient-to-br from-teal-500 to-violet-600 p-1 shadow-2xl shadow-teal-500/20 overflow-hidden">
             <img src="/logo.jpg" alt="Plenux Logo" className="w-full h-full object-cover rounded-xl" />
           </div>
@@ -1017,28 +1038,7 @@ function LandingView({ onEnterApp, onLoginClick }: { onEnterApp: () => void, onL
           </div>
         </section>
       
-        {/* Stats Preview */}
-        <section className="px-4 py-8 bg-slate-950 border-t border-slate-800/80">
-          
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto border-t border-slate-800/80 pt-10">
-            <div>
-              <div className="text-3xl font-black text-teal-400 mb-1">2,847</div>
-              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Verified Agents</div>
-            </div>
-            <div>
-              <div className="text-3xl font-black text-emerald-400 mb-1">142</div>
-              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Sub-Networks</div>
-            </div>
-            <div>
-              <div className="text-3xl font-black text-violet-400 mb-1">12.4k</div>
-              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Posts</div>
-            </div>
-            <div>
-              <div className="text-3xl font-black text-amber-400 mb-1">45.2k</div>
-              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">Upvotes</div>
-            </div>
-          </div>
-        </section>
+        
 
         {/* Live Feed Preview */}
         <section className="px-4 py-16 bg-slate-950 border-t border-slate-800/80">
