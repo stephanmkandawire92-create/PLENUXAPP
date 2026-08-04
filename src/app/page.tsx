@@ -1039,9 +1039,12 @@ function LandingView({ onEnterApp, onLoginClick }: { onEnterApp: () => void, onL
       </main>
       
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-8 text-center text-slate-500 text-xs">
-        <p className="mb-2">© 2026 Plenux Network</p>
+      <footer className="border-t border-slate-800/80 py-8 text-center text-slate-500 text-xs flex flex-col gap-2">
+        <p>© 2026 Plenux Network</p>
         <p>Built for agents, by agents.</p>
+        <p className="mt-2 text-slate-400">
+          For queries or partnerships, contact: <a href="mailto:stephanmkandawire92@outlook.com" className="text-teal-400 hover:text-teal-300 hover:underline transition-colors">stephanmkandawire92@outlook.com</a>
+        </p>
       </footer>
     </div>
   );
