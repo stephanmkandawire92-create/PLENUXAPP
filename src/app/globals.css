@@ -9,12 +9,12 @@
   --color-surface-800: #1e293b;
   --color-surface-700: #334155;
 
-  --color-accent-400: #2dd4bf;
-  --color-accent-500: #14b8a6;
-  --color-accent-600: #0d9488;
+  --color-accent-400: #a78bfa;
+  --color-accent-500: #8b5cf6;
+  --color-accent-600: #7c3aed;
 
-  --color-glow-teal: rgba(20, 184, 166, 0.15);
-  --color-glow-emerald: rgba(16, 185, 129, 0.12);
+  --color-glow-teal: rgba(139, 92, 246, 0.15);
+  --color-glow-emerald: rgba(217, 70, 239, 0.12);
 }
 
 /* ── Base Resets ── */
@@ -81,10 +81,10 @@ body {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 12px rgba(20, 184, 166, 0.2);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
   }
   50% {
-    box-shadow: 0 0 24px rgba(20, 184, 166, 0.4);
+    box-shadow: 0 0 24px rgba(139, 92, 246, 0.4);
   }
 }
 
@@ -117,6 +117,30 @@ body {
   }
 }
 
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slide-down-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 1000px;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 /* ── Animation Utilities ── */
 .animate-fade-in-up {
   animation: fade-in-up 0.5s ease-out both;
@@ -140,6 +164,20 @@ body {
 
 .animate-count-up {
   animation: count-up 0.3s ease-out both;
+}
+
+.animate-pop {
+  animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-slide-down-fade {
+  animation: slide-down-fade 0.4s ease-out both;
+}
+
+.skeleton-loading {
+  background: linear-gradient(90deg, rgba(30, 41, 59, 0.5) 25%, rgba(51, 65, 85, 0.5) 50%, rgba(30, 41, 59, 0.5) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 2s infinite linear;
 }
 
 /* Stagger children */
@@ -169,12 +207,12 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(20, 184, 166, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(139, 92, 246, 0.1);
 }
 
 /* ── Gradient Text ── */
 .gradient-text {
-  background: linear-gradient(135deg, #2dd4bf 0%, #34d399 50%, #a78bfa 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #d946ef 50%, #f472b6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -185,7 +223,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(20, 184, 166, 0.08) 50%,
+    rgba(139, 92, 246, 0.08) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -205,8 +243,8 @@ body {
   width: 3px;
   height: 60%;
   border-radius: 0 2px 2px 0;
-  background: linear-gradient(180deg, #2dd4bf, #10b981);
-  box-shadow: 0 0 8px rgba(20, 184, 166, 0.5);
+  background: linear-gradient(180deg, #a78bfa, #d946ef);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
 }
 
 /* ── Vote Button ── */
@@ -214,14 +252,14 @@ body {
   transition: all 0.2s ease;
 }
 .vote-btn:hover {
-  color: #2dd4bf;
+  color: #a78bfa;
   transform: scale(1.05);
 }
 .vote-btn:active {
   transform: scale(0.95);
 }
 .vote-btn.voted {
-  color: #2dd4bf;
+  color: #a78bfa;
 }
 
 /* ── Status Pulse ── */
@@ -233,7 +271,7 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #10b981;
+  background: #d946ef;
   border: 2px solid #020617;
   animation: pulse-glow 2s ease-in-out infinite;
 }
@@ -257,8 +295,8 @@ body {
 
 /* ── Input Focus Ring ── */
 input:focus {
-  border-color: #14b8a6 !important;
-  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.15);
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15);
 }
 
 /* ── Hire/CTA button hover ── */
@@ -271,7 +309,7 @@ input:focus {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(16, 185, 129, 0.2));
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(217, 70, 239, 0.2));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -280,7 +318,7 @@ input:focus {
 }
 .btn-glow:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.2);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.2);
 }
 
 /* ── Tag hover ── */
@@ -288,7 +326,7 @@ input:focus {
   transition: all 0.2s ease;
 }
 .tag-hover:hover {
-  background: rgba(20, 184, 166, 0.15);
-  color: #2dd4bf;
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
   transform: translateY(-1px);
 }

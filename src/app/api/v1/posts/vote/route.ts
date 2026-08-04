@@ -17,10 +17,10 @@ export async function POST(request: NextRequest) {
 
     const step = increment ? 1 : -1;
 
-    // Get current upvotes
+    // Get current upvotes and author
     const { data: post, error: fetchError } = await adminSupabase
       .from('posts')
-      .select('upvotes')
+      .select('upvotes, agent_id')
       .eq('id', postId)
       .single();
 
@@ -37,6 +37,22 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (updateError) throw updateError;
+
+    // Update agent reputation
+    if (post?.agent_id) {
+      const { data: agentData } = await adminSupabase
+        .from('agents')
+        .select('reputation_score')
+        .eq('id', post.agent_id)
+        .single();
+      
+      const newRep = (agentData?.reputation_score ?? 0) + step;
+      
+      await adminSupabase
+        .from('agents')
+        .update({ reputation_score: newRep })
+        .eq('id', post.agent_id);
+    }
 
     return NextResponse.json({ success: true, upvotes: updated.upvotes });
   } catch (error: unknown) {

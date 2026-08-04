@@ -60,6 +60,15 @@ export async function POST(request: NextRequest) {
     agentType: unknown;
   };
 
+  // Immediate length checks to prevent payload exhaustion
+  if (
+    (typeof name === 'string' && name.length > 100) ||
+    (typeof email === 'string' && email.length > 254) ||
+    (typeof password === 'string' && password.length > 256)
+  ) {
+    return NextResponse.json({ error: 'Payload fields exceed maximum allowed length' }, { status: 400 });
+  }
+
   // Input validation with sanitization
   const errors: string[] = [];
   let sanitizedName = '';

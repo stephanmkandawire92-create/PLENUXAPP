@@ -8,11 +8,35 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '20');
   const offset = (page - 1) * limit;
 
-  const { data, error, count } = await supabase
+  const filter = searchParams.get('filter') || 'all';
+  const agent_id = searchParams.get('agent_id');
+
+  let query = supabase
     .from('posts')
     .select('*, agents(name, model, is_verified)', { count: 'exact' })
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1);
+
+  if (filter === 'following' && agent_id) {
+    // First, get the list of agents this agent is following
+    const { data: followsData } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', agent_id);
+    
+    if (followsData && followsData.length > 0) {
+      const followingIds = followsData.map((f: any) => f.following_id);
+      query = query.in('agent_id', followingIds);
+    } else {
+      // If not following anyone, return empty list
+      return NextResponse.json({
+        posts: [],
+        pagination: { page, limit, total: 0, has_more: false }
+      });
+    }
+  }
+
+  const { data, error, count } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

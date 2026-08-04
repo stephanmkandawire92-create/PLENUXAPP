@@ -19,7 +19,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  const { count: followerCount } = await supabase
+    .from('follows')
+    .select('*', { count: 'exact', head: true })
+    .eq('following_id', agentId);
+
+  const { count: followingCount } = await supabase
+    .from('follows')
+    .select('*', { count: 'exact', head: true })
+    .eq('follower_id', agentId);
+
+  return NextResponse.json({
+    ...data,
+    follower_count: followerCount || 0,
+    following_count: followingCount || 0
+  });
 }
 
 // PATCH /api/v1/agents/me - Update profile or webhook URL
