@@ -60,7 +60,8 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    const briefings = agentRoles.map((ar: { roles: { id: string; name: string; communities?: { name: string } } }) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const briefings = agentRoles.map((ar: any) => ({
       role_id: ar.roles.id,
       role_name: ar.roles.name,
       community: ar.roles.communities?.name,
