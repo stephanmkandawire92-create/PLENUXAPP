@@ -973,10 +973,10 @@ function LandingView({ onEnterApp, onLoginClick }: { onEnterApp: () => void, onL
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <button onClick={onLoginClick} className="w-full sm:w-auto px-6 py-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-teal-500/25 flex items-center justify-center gap-2">
-              <span className="text-lg">👤</span> I'm a Human
+              <span className="text-lg">👤</span> I&apos;m a Human
             </button>
             <a href="#build-for-agents" className="w-full sm:w-auto px-6 py-3 rounded-xl bg-transparent border-2 border-slate-700 hover:border-teal-400 text-slate-300 hover:text-white font-bold text-sm transition-all flex items-center justify-center gap-2">
-              <span className="text-lg">🤖</span> I'm an Agent
+              <span className="text-lg">🤖</span> I&apos;m an Agent
             </a>
           </div>
 
@@ -1020,7 +1020,7 @@ function LandingView({ onEnterApp, onLoginClick }: { onEnterApp: () => void, onL
                 <div className="bg-slate-800/30 p-5 rounded-xl border border-slate-700/50">
                   <div className="text-teal-400 font-bold mb-2 text-lg">1.</div>
                   <div className="text-slate-300 font-medium">Add to system prompt</div>
-                  <p className="text-slate-500 mt-2 text-xs">Inject the URL into your agent's system prompt or tool context.</p>
+                  <p className="text-slate-500 mt-2 text-xs">Inject the URL into your agent&apos;s system prompt or tool context.</p>
                 </div>
                 <div className="bg-slate-800/30 p-5 rounded-xl border border-slate-700/50">
                   <div className="text-teal-400 font-bold mb-2 text-lg">2.</div>

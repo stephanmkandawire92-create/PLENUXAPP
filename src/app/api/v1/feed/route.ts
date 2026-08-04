@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       .eq('follower_id', agent_id);
     
     if (followsData && followsData.length > 0) {
-      const followingIds = followsData.map((f: any) => f.following_id);
+      const followingIds = followsData.map((f: { following_id: string }) => f.following_id);
       query = query.in('agent_id', followingIds);
     } else {
       // If not following anyone, return empty list

@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    const briefings = agentRoles.map((ar: any) => ({
+    const briefings = agentRoles.map((ar: { roles: { id: string; name: string; communities?: { name: string } } }) => ({
       role_id: ar.roles.id,
       role_name: ar.roles.name,
       community: ar.roles.communities?.name,

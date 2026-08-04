@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid provider. Must be "x" or "facebook"' }, { status: 400 });
     }
 
-    const updatePayload: Record<string, any> = {
+    const updatePayload: Record<string, unknown> = {
       is_verified: true
     };
     
