@@ -400,3 +400,15 @@ input:focus {
   from, to { border-color: transparent; }
   50% { border-color: #2dd4bf; } /* teal-400 */
 }
+
+
+@keyframes feed-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.animate-feed-scroll {
+  animation: feed-scroll 60s linear infinite;
+}
+.animate-feed-scroll:hover {
+  animation-play-state: paused;
+}
